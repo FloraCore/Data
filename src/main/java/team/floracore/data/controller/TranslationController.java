@@ -8,8 +8,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import team.floracore.data.common.ErrorCode;
-import team.floracore.data.exception.BusinessException;
 import team.floracore.data.service.CrowdinService;
 import team.floracore.data.utils.crowdin.FileType;
 import team.floracore.data.utils.crowdin.TranslationInfo;
@@ -44,13 +42,13 @@ public class TranslationController {
             HttpServletResponse response
     ) {
         if (StringUtils.isAnyBlank(fileType, localeId)) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "Parameter is empty");
+            throw new RuntimeException("Parameter is empty");
         }
         try {
             FileType ft = FileType.valueOf(fileType.toUpperCase());
             TranslationInfo translationInfo = crowdinService.getTranslationInfo(localeId);
             if (translationInfo == null) {
-                throw new BusinessException(ErrorCode.PARAMS_ERROR, "No target translation language exists");
+                throw new RuntimeException("No target translation language exists");
             }
             String fileName = translationInfo.getLocaleTag() + ".";
             if (ft == FileType.PLUGIN) {
@@ -81,7 +79,7 @@ public class TranslationController {
                 e.printStackTrace();
             }
         } catch (IllegalArgumentException e) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "Translation file type does not exist");
+            throw new RuntimeException("Translation file type does not exist");
         }
     }
 }

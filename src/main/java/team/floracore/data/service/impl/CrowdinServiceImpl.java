@@ -32,10 +32,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Crowdin服务接口实现
@@ -45,7 +42,7 @@ import java.util.Objects;
 @Service
 @Slf4j
 public class CrowdinServiceImpl implements CrowdinService {
-    private static final HashMap<String, TranslationInfo> languages = new HashMap<>();
+    private static final Map<String, TranslationInfo> languages = new HashMap<>();
     @Value("${crowdin.token:null}")
     private String token;
     @Value("${crowdin.project.id:582143}")
@@ -70,6 +67,11 @@ public class CrowdinServiceImpl implements CrowdinService {
         for (FileType value : FileType.values()) {
             downloadTranslationFile(value);
         }
+    }
+
+    @Override
+    public Map<String, TranslationInfo> getLanguages() {
+        return languages;
     }
 
     @Override

@@ -12,6 +12,7 @@ import team.floracore.data.utils.crowdin.TranslationInfo;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Crowdin服务接口
@@ -20,6 +21,8 @@ import java.util.List;
  */
 public interface CrowdinService {
     void refreshLanguages() throws IOException;
+
+    Map<String, TranslationInfo> getLanguages();
 
     void downloadTranslationFile(FileType fileType) throws IOException;
 

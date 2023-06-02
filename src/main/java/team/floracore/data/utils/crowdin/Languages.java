@@ -2,7 +2,8 @@ package team.floracore.data.utils.crowdin;
 
 import lombok.Data;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 语言列表
@@ -11,5 +12,6 @@ import java.util.List;
  */
 @Data
 public class Languages {
-    public List<TranslationInfo> languages;
+    public Map<String, TranslationInfo> languages = new HashMap<>();
+    public int cacheMaxAge;
 }

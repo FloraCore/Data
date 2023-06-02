@@ -29,7 +29,8 @@ public class DataController {
     @GetMapping("/translations")
     public Languages getTranslationInfo() {
         Languages languages = new Languages();
-        languages.setLanguages(crowdinService.getTranslationInfoList());
+        languages.setLanguages(crowdinService.getLanguages());
+        languages.setCacheMaxAge(600000);
         return languages;
     }
 
