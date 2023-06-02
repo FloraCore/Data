@@ -6,16 +6,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import team.floracore.data.common.BaseResponse;
-import team.floracore.data.common.ResultUtils;
 import team.floracore.data.service.CrowdinService;
-import team.floracore.data.utils.crowdin.TranslationInfo;
+import team.floracore.data.utils.crowdin.Languages;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.List;
 
 /**
  * Data 接口控制器
@@ -30,8 +27,10 @@ public class DataController {
     private CrowdinService crowdinService;
 
     @GetMapping("/translations")
-    public BaseResponse<List<TranslationInfo>> getTranslationInfo() {
-        return ResultUtils.success(crowdinService.getTranslationInfoList());
+    public Languages getTranslationInfo() {
+        Languages languages = new Languages();
+        languages.setLanguages(crowdinService.getTranslationInfoList());
+        return languages;
     }
 
 
