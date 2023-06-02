@@ -21,6 +21,8 @@ import java.util.List;
 public interface CrowdinService {
     void refreshLanguages() throws IOException;
 
+    void downloadTranslationFile(FileType fileType) throws IOException;
+
     List<TranslationInfo> getTranslationInfo();
 
     void processLanguageProgress(FileType fileType);
@@ -40,4 +42,6 @@ public interface CrowdinService {
     ReportStatus generateReport();
 
     Client getClient();
+
+    DownloadLink getTranslationFileDownloadLink(String targetLanguageId, long id);
 }

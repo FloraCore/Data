@@ -9,6 +9,7 @@ import com.crowdin.client.reports.model.ReportStatus;
 import com.crowdin.client.reports.model.ReportsFormat;
 import com.crowdin.client.reports.model.TopMembersGenerateReportRequest;
 import com.crowdin.client.reports.model.Unit;
+import com.crowdin.client.translations.model.ExportProjectTranslationRequest;
 import com.crowdin.client.translationstatus.model.LanguageProgress;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -27,7 +28,10 @@ import team.floracore.data.utils.crowdin.Contributor;
 import team.floracore.data.utils.crowdin.FileType;
 import team.floracore.data.utils.crowdin.TranslationInfo;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -54,10 +58,64 @@ public class CrowdinServiceImpl implements CrowdinService {
     @Override
     public void refreshLanguages() throws IOException {
         languages.clear();
-        processLanguageProgress(FileType.PLUGIN);
-        processLanguageProgress(FileType.WEB);
+        for (FileType value : FileType.values()) {
+            processLanguageProgress(value);
+            File directory = new File("./translations/" + value.name().toLowerCase());
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+        }
         processContributors(getContributors());
         updateTranslationInfo();
+        for (FileType value : FileType.values()) {
+            downloadTranslationFile(value);
+        }
+    }
+
+    @Override
+    public void downloadTranslationFile(FileType fileType) throws IOException {
+        for (String key : languages.keySet()) {
+            TranslationInfo translationInfo = languages.get(key);
+            String fileName = translationInfo.getLocaleTag() + ".";
+            long id;
+            if (fileType == FileType.PLUGIN) {
+                id = pluginId;
+                fileName = fileName + "properties";
+            } else if (fileType == FileType.WEB) {
+                id = webId;
+                fileName = fileName + "json";
+            } else {
+                throw new IllegalArgumentException("Invalid FileType");
+            }
+            String DOWNLOAD_URL = getTranslationFileDownloadLink(translationInfo.getLanguageId(), id).getUrl();
+            OkHttpClient client = new OkHttpClient();
+            Request request = new Request.Builder()
+                    .url(DOWNLOAD_URL)
+                    .build();
+            try (Response response = client.newCall(request).execute()) {
+                if (response.isSuccessful()) {
+                    ResponseBody responseBody = response.body();
+                    File file = new File("./translations/" + fileType.name().toLowerCase(), fileName);
+                    try (InputStream inputStream = responseBody.byteStream();
+                         FileOutputStream outputStream = new FileOutputStream(file)) {
+                        byte[] buffer = new byte[8192];
+                        int bytesRead;
+                        while ((bytesRead = inputStream.read(buffer)) != -1) {
+                            outputStream.write(buffer, 0, bytesRead);
+                        }
+                        outputStream.flush();
+                    } catch (IOException e) {
+                        throw new IOException("写入文件失败！", e);
+                    }
+                    log.info(fileName + "翻译文件下载成功！文件类型：" + fileType.name());
+                } else {
+                    throw new RuntimeException("下载文件失败！HTTP响应码：" + response.code());
+                }
+            } catch (IOException e) {
+                throw new IOException("下载文件发生异常：" + e.getMessage(), e);
+            }
+        }
+
     }
 
     @Override
@@ -193,5 +251,14 @@ public class CrowdinServiceImpl implements CrowdinService {
     public Client getClient() {
         Credentials credentials = new Credentials(token, null);
         return new Client(credentials);
+    }
+
+    @Override
+    public DownloadLink getTranslationFileDownloadLink(String targetLanguageId, long id) {
+        ExportProjectTranslationRequest exportProjectTranslationRequest = new ExportProjectTranslationRequest();
+        exportProjectTranslationRequest.setTargetLanguageId(targetLanguageId);
+        exportProjectTranslationRequest.setFileIds(List.of(id));
+        exportProjectTranslationRequest.setSkipUntranslatedStrings(true);
+        return getClient().getTranslationsApi().exportProjectTranslation(projectId, exportProjectTranslationRequest).getData();
     }
 }
