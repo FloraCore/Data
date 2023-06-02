@@ -23,7 +23,7 @@ import java.io.OutputStream;
  * @author xLikeWATCHDOG
  */
 @RestController
-@RequestMapping("/translation")
+@RequestMapping("/translations")
 @Slf4j
 public class TranslationController {
     @Resource
