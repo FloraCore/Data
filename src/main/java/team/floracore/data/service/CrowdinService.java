@@ -23,7 +23,9 @@ public interface CrowdinService {
 
     void downloadTranslationFile(FileType fileType) throws IOException;
 
-    List<TranslationInfo> getTranslationInfo();
+    List<TranslationInfo> getTranslationInfoList();
+
+    TranslationInfo getTranslationInfo(String id);
 
     void processLanguageProgress(FileType fileType);
 

@@ -105,22 +105,27 @@ public class CrowdinServiceImpl implements CrowdinService {
                         }
                         outputStream.flush();
                     } catch (IOException e) {
-                        throw new IOException("写入文件失败！", e);
+                        throw new IOException("Failed to write file!", e);
                     }
-                    log.info(fileName + "翻译文件下载成功！文件类型：" + fileType.name());
+                    log.info(fileName + "Translation files downloaded successfully! File Type:" + fileType.name());
                 } else {
-                    throw new RuntimeException("下载文件失败！HTTP响应码：" + response.code());
+                    throw new RuntimeException("Failed to download file! HTTP response code:" + response.code());
                 }
             } catch (IOException e) {
-                throw new IOException("下载文件发生异常：" + e.getMessage(), e);
+                throw new IOException("Exception in downloading file:" + e.getMessage(), e);
             }
         }
 
     }
 
     @Override
-    public List<TranslationInfo> getTranslationInfo() {
+    public List<TranslationInfo> getTranslationInfoList() {
         return languages.values().stream().toList();
+    }
+
+    @Override
+    public TranslationInfo getTranslationInfo(String id) {
+        return languages.get(id);
     }
 
     @Override
@@ -131,7 +136,6 @@ public class CrowdinServiceImpl implements CrowdinService {
             int percent = languageProgress.getTranslationProgress();
             TranslationInfo translationInfo = languages.computeIfAbsent(id, k -> new TranslationInfo());
             translationInfo.setLanguageId(id);
-
             if (fileType == FileType.PLUGIN) {
                 translationInfo.setProgress(percent);
             } else if (fileType == FileType.WEB) {
@@ -222,10 +226,10 @@ public class CrowdinServiceImpl implements CrowdinService {
                 }.getType())));
                 return contributors;
             } else {
-                throw new RuntimeException("请求失败：" + response.code() + " " + response.message());
+                throw new RuntimeException("Request failed:" + response.code() + " " + response.message());
             }
         } catch (IOException e) {
-            throw new IOException("请求异常：" + e.getMessage());
+            throw new IOException("Request exception:" + e.getMessage());
         }
     }
 
